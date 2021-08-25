@@ -1,0 +1,57 @@
+version: '3'
+
+networks:
+    ladamoda:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+                - subnet: 10.10.3.0/29
+services:
+    front:
+        build:
+            context: ./client
+            dockerfile: Dockerfile
+            args: 
+                buildno: 1
+        container_name: ladamoda-front
+        ports:
+            - 8132:80
+        tty: true
+        volumes:
+            - ./../client/front/dist:/usr/local/apache2/htdocs/
+        networks:
+            ladamoda:
+                ipv4_address: 10.10.3.3
+    back:
+        build:
+            context: ./webserver
+            dockerfile: Dockerfile
+            args:
+                buildno: 1
+        container_name: ladamoda-back
+        ports: 
+            - 8183:80
+        tty: true
+        volumes:
+            - ./../api:/var/www/html/
+            - ./webserver/config/apache2.conf:/etc/apache2/apache2.conf
+            - ./webserver/config/000-default.conf:/etc/apache2/sites-enabled/000-default.conf
+            - ./webserver/config/php.ini:/usr/local/etc/php/php.ini
+        networks:
+            ladamoda:
+                ipv4_address: 10.10.3.4
+    ladamoda-db:
+        image: mysql:5.7.22
+        command: --innodb-use-native-aio=0
+        ports: 
+            - "3306"
+        volumes:
+            - ./database:/var/lib/mysql
+        environment: 
+            MYSQL_DATABASE: ladamoda
+            MYSQL_ROOT_PASSWORD: secret
+        networks:
+            ladamoda:
+                ipv4_address: 10.10.3.2
+        
