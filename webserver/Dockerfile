@@ -21,7 +21,7 @@ RUN yes | pecl install xdebug \
     && echo "xdebug.remote_autostart=on" >> /usr/local/etc/php/conf.d/xdebug.ini
 
 RUN docker-php-ext-configure imap --with-kerberos --with-imap-ssl
-RUN docker-php-ext-install imap pdo_mysql pdo
+RUN docker-php-ext-install imap pdo_mysql pdo bcmath intl simplexml zip
 
 RUN a2enmod rewrite && service apache2 restart
 
